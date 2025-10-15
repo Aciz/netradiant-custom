@@ -23,3 +23,4 @@
 
 int Convert_CountLightmaps( const char* dirname );
 void Convert_ReferenceLightmaps( const char* base, std::vector<int>& lmIndices );
+bool Convert_SkipShader ( const char *shader );

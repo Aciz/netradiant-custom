@@ -191,6 +191,8 @@ Q3map2:
 	* fix AP texture alignment deduction during bsp to map decompilation
 	* -format map_220: bsp to map of Valve220 format conversion
 	* support separated _ambient, _color per group, misc_model entities
+	* -onlymodels: convert only surfaces on 'misc_model' entities when converting from BSP to ASE/OBJ (not fully accurate)
+	* -onlyshader [shader]: convert only surfaces with given shader when converting from BSP to ASE/OBJ (can be used more than once to specify multiple shaders)
 
 
 

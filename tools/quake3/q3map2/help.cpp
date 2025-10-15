@@ -324,6 +324,8 @@ static void HelpConvert()
 		{ "-readmap", "Force converting map to selected format" },
 		{ "-shadersasbitmap", "Save shader names as bitmap names in the model so it works as a prefab (only when writing ase and obj)" },
 		{ "-wtf", "During bsp to map conversion use common/WTF on faces with failed texture alignment deduction" },
+		{ "-onlymodels", "Convert only \"misc_model\" surfaces (not fully accurate, only when writing ase and obj)" },
+		{ "-onlyshader", "Convert only surfaces with specified shader (can be used more than once to select multiple shaders, only when writing ase and obj)" },
 	};
 
 	HelpOptions( "Converting & Decompiling", 0, 80, options );
