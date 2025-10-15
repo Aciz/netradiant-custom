@@ -190,6 +190,8 @@ Q3map2:
 	* -wtf: During bsp to map conversion use common/WTF on faces with failed texture alignment deduction
 	* fix AP texture alignment deduction during bsp to map decompilation
 	* -format map_220: bsp to map of Valve220 format conversion
+	* -onlymodels: convert only surfaces on 'misc_model' entities when converting from BSP to ASE/OBJ (not fully accurate)
+	* -onlyshader [shader]: convert only surfaces with given shader when converting from BSP to ASE/OBJ (can be used more than once to specify multiple shaders)
 
 
 

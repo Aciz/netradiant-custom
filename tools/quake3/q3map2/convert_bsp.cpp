@@ -1117,6 +1117,18 @@ int ConvertBSPMain( Args& args ){
 		while ( args.takeArg( "-wtf" ) ) {
 			g_decompile_wtf = true;
 		}
+		while ( args.takeArg( "-onlymodels" ) ) {
+			Sys_Printf( "Converting only \"misc_models\" surfaces.\n" );
+			onlyModels = true;
+		}
+		while ( args.takeArg( "-onlyshader" ) ) {
+			const char *arg = args.takeNext();
+
+			if ( std::none_of( onlyShaders.cbegin(), onlyShaders.cend(), [arg]( const CopiedString &shader ) {
+				return striEqual( shader.c_str(), arg );} ) ) {
+					onlyShaders.push_back( arg );
+			}
+		}
 	}
 
 	LoadShaderInfo();

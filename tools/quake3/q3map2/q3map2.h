@@ -1781,6 +1781,10 @@ inline bool lightmapsAsTexcoord;
 inline bool g_decompile_modelClip;
 inline bool g_decompile_wtf;
 
+// for .ase/obj conversion
+inline bool onlyModels;
+inline std::vector<CopiedString> onlyShaders;
+
 /* general commandline arguments */
 inline bool force;
 inline int patchSubdivisions = 8;                       /* ydnar: -patchmeta subdivisions */

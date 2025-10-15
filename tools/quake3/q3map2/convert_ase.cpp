@@ -46,7 +46,11 @@ static void ConvertSurface( FILE *f, int modelNum, int surfaceNum, const Vector3
 	const bspDrawSurface_t& ds = bspDrawSurfaces[ surfaceNum ];
 
 	/* ignore patches for now */
-	if ( ds.surfaceType != MST_PLANAR && ds.surfaceType != MST_TRIANGLE_SOUP ) {
+	if ( ( onlyModels || ds.surfaceType != MST_PLANAR ) && ds.surfaceType != MST_TRIANGLE_SOUP ) {
+		return;
+	}
+
+	if ( Convert_SkipShader( bspShaders[ds.shaderNum].shader ) ) {
 		return;
 	}
 
@@ -234,6 +238,10 @@ static void ConvertModel( FILE *f, int modelNum, const Vector3& origin, const st
  */
 
 static void ConvertShader( FILE *f, const bspShader_t& shader ){
+	if ( Convert_SkipShader( shader.shader ) ) {
+		return;
+	}
+
 	/* get shader */
 	shaderInfo_t& si = ShaderInfoForShader( shader.shader );
 

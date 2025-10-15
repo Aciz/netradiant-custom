@@ -30,6 +30,7 @@
 
 /* dependencies */
 #include "q3map2.h"
+#include "convert_obj.h"
 
 
 
@@ -48,7 +49,11 @@ static void ConvertSurfaceToOBJ( FILE *f, int modelNum, int surfaceNum, const Ve
 	const bspDrawSurface_t& ds = bspDrawSurfaces[ surfaceNum ];
 
 	/* ignore patches for now */
-	if ( ds.surfaceType != MST_PLANAR && ds.surfaceType != MST_TRIANGLE_SOUP ) {
+	if ( ( onlyModels || ds.surfaceType != MST_PLANAR ) && ds.surfaceType != MST_TRIANGLE_SOUP ) {
+		return;
+	}
+
+	if ( Convert_SkipShader( bspShaders[ds.shaderNum].shader ) ) {
 		return;
 	}
 
@@ -143,6 +148,10 @@ static void ConvertModelToOBJ( FILE *f, int modelNum, const Vector3& origin, con
  */
 
 static void ConvertShaderToMTL( FILE *f, const bspShader_t& shader ){
+	if ( Convert_SkipShader( shader.shader ) ) {
+		return;
+	}
+
 	/* get shader */
 	shaderInfo_t& si = ShaderInfoForShader( shader.shader );
 
@@ -251,8 +260,15 @@ void Convert_ReferenceLightmaps( const char* base, std::vector<int>& lmIndices )
 	}
 }
 
+bool Convert_SkipShader ( const char *shader ) {
+	if ( onlyShaders.empty() ) {
+		return false;
+	}
 
-
+	return std::none_of( onlyShaders.cbegin(), onlyShaders.cend(), [&shader] ( const CopiedString &s ) {
+		return striEqual( shader, s.c_str() );
+	} );
+}
 
 /*
    ConvertBSPToASE()
