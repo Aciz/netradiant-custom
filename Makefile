@@ -1423,7 +1423,7 @@ endif
 ifeq ($(OS),Win32)
 install-dll: binaries
 ifeq ($(INSTALL_DLLS),yes)
-	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" INSTALLDIR="$(INSTALLDIR)" $(SH) $(DLLINSTALL)
+	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" INSTALLDIR="$(INSTALLDIR)" QT_MAJOR="$(QT)" $(SH) $(DLLINSTALL)
 endif
 else
 install-dll: binaries

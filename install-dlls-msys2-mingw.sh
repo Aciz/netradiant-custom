@@ -69,11 +69,13 @@ done
 
 cd $MINGWDIR
 
+QTPREFIX="./share/qt${QT_MAJOR:-5}/plugins"
+
 for EXTRAPATH in \
-    './share/qt5/plugins/imageformats/*.dll' \
-    './share/qt5/plugins/platforms/*.dll' \
-    './share/qt5/plugins/styles/*.dll' \
-    './share/qt5/plugins/iconengines/*.dll' \
+    "$QTPREFIX/imageformats/*.dll" \
+    "$QTPREFIX/platforms/*.dll" \
+    "$QTPREFIX/styles/*.dll" \
+    "$QTPREFIX/iconengines/*.dll" \
 ; do
     cp --parent -v `find $EXTRAPATH -type f` "$INSTALLDIR"
 done

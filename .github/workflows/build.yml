@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: msys2/setup-msys2@v2
       with:
-        install: base-devel ${{ matrix.prefix }}-toolchain ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-qt5-svg ${{ matrix.prefix }}-assimp ${{ matrix.prefix }}-libxml2 git unzip p7zip
+        install: base-devel ${{ matrix.prefix }}-toolchain ${{ matrix.prefix }}-pkgconf ${{ matrix.prefix }}-qt5-base ${{ matrix.prefix }}-qt5-svg ${{ matrix.prefix }}-assimp ${{ matrix.prefix }}-libxml2 git unzip p7zip
         msystem: ${{ matrix.msystem }}
         path-type: minimal
         release: false
@@ -48,6 +48,47 @@ jobs:
       with:
         name: Windows-${{ matrix.arch }}
         path: Windows-${{ matrix.arch }}.zip
+        if-no-files-found: error
+
+  windows-msys-qt6:
+    name: Windows Qt6 ${{ matrix.arch }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64]
+        include:
+          - arch: x86_64
+            msystem: MINGW64
+            prefix: mingw-w64-x86_64
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        install: base-devel ${{ matrix.prefix }}-toolchain ${{ matrix.prefix }}-pkgconf ${{ matrix.prefix }}-qt6-base ${{ matrix.prefix }}-qt6-svg ${{ matrix.prefix }}-assimp ${{ matrix.prefix }}-libxml2 git unzip p7zip
+        msystem: ${{ matrix.msystem }}
+        path-type: minimal
+        release: false
+        update: false
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Build
+      run: |
+        make MAKEFILE_CONF=msys2-Makefile.conf QT=6 -j4
+        mkdir -p install/settings
+        7z a Windows-${{ matrix.arch }}-Qt6.zip ./install/*
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Windows-${{ matrix.arch }}-Qt6
+        path: Windows-${{ matrix.arch }}-Qt6.zip
         if-no-files-found: error
 
   linux:
@@ -79,6 +120,35 @@ jobs:
       with:
         name: Linux-${{ matrix.arch }}
         path: Linux-${{ matrix.arch }}.7z
+        if-no-files-found: error
+
+  linux-qt6:
+    name: Linux Qt6 ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64]
+
+    steps:
+    - name: Install tools
+      run: |
+          sudo apt-get -qq update
+          sudo apt-get -y install mesa-common-dev qt6-base-dev libqt6svg6-dev libglib2.0-dev libjpeg-dev libpng-dev libassimp-dev
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Build
+      run: |
+        make CC=gcc-14 CXX=g++-14 QT=6 CXXFLAGS="-Wno-deprecated-copy" -j4
+        ./appimage.sh
+        7z a Linux-${{ matrix.arch }}-Qt6.7z ./NetRadiant-Custom-x86_64.AppImage
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Linux-${{ matrix.arch }}-Qt6
+        path: Linux-${{ matrix.arch }}-Qt6.7z
         if-no-files-found: error
 
   create-testing:
