@@ -76,6 +76,16 @@
 #include "qerplugin.h"
 #include "os/file.h"
 
+#ifdef WIN32
+// ShellExecute(): Qt5 used to pull these in transitively, Qt6 does not.
+// NOMINMAX keeps windows.h from breaking the std::min/std::max uses below.
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#include <shellapi.h>
+#endif
+
 
 
 // =============================================================================
@@ -458,6 +468,7 @@ void DoShaderInfoDlg( const char* name, const char* filename, const char* title 
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QTextStream>
+#include <QFile>
 
 void DoInstallDevFilesDlg( const char *enginePath ){
 	std::vector<std::filesystem::path> files; // relative source files paths
@@ -2217,7 +2228,7 @@ private:
 			if( list.size() > 3 ){ // try to find long enough common prefix to reduce typing
 				int len = list[0].length();
 				for( int i = 0; i < list.size() && len > 0; ++i ){
-					len = std::min( len, list[i].length() );
+					len = std::min( len, static_cast<int>( list[i].length() ) );
 					for( int j = 0; j < len; ++j ){
 						if( list[0][j].toLower() != list[i][j].toLower() ){
 							len = j;

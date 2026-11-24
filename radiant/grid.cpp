@@ -20,6 +20,7 @@
  */
 
 #include "grid.h"
+#include <QActionGroup>
 
 #include <cmath>
 #include <vector>

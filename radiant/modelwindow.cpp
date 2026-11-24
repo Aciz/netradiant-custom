@@ -992,9 +992,7 @@ protected:
 			m_fbo->blit();
 			m_fbo->release();
 		}
-	}
-
-	void mousePressEvent( QMouseEvent *event ) override {
+( QMouseEvent *event ) override {
 		setFocus();
 		const auto press = m_mouse.press( event );
 		if( press == MousePresses::Left2x ){

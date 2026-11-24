@@ -1455,7 +1455,7 @@ void create_main_statusbar( QStatusBar *statusbar, QLabel *pStatusLabel[c_status
 		if( i == c_status_brushcount ){
 			auto *widget = new QWidget;
 			auto *hbox = new QHBoxLayout( widget );
-			hbox->setMargin( 0 );
+			hbox->setContentsMargins( 0, 0, 0, 0 );
 			statusbar->addPermanentWidget( widget, 0 );
 			const char* imgs[3] = { "status_brush.png", "status_patch.png", "status_entity.png" };
 			for( ; i < c_status_brushcount + 3; ++i ){
@@ -1537,12 +1537,21 @@ void MainFrame::SetActiveXY( XYWnd* p ){
 }
 
 #ifdef WIN32
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
 #include <QtPlatformHeaders/QWindowsWindowFunctions>
+#endif
 #endif
 void MainFrame_toggleFullscreen(){
 	QWidget *w = MainFrame_getWindow();
-#ifdef WIN32 // https://doc.qt.io/qt-5.15/windows-issues.html#fullscreen-opengl-based-windows
+#ifdef WIN32
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+	// https://doc.qt.io/qt-5.15/windows-issues.html#fullscreen-opengl-based-windows
 	QWindowsWindowFunctions::setHasBorderInFullScreen( w->windowHandle(), true );
+#else
+	// Qt6 removed the QtPlatformHeaders module. Its replacement, QNativeInterface::Private::QWindowsWindow,
+	// is only reachable through QtGui private headers and requires RTTI, which this build disables, so the
+	// fullscreen border workaround is not applied on Windows with Qt 6.
+#endif
 #endif
 	w->setWindowState( w->windowState() ^ Qt::WindowState::WindowFullScreen );
 }

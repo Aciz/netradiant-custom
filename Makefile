@@ -30,6 +30,21 @@ WINDRES            ?= windres # only used on Win32
 PKGCONFIG          ?= pkg-config
 PKG_CONFIG_PATH    ?=
 
+QT                 ?= 5
+# or: 5, 6
+# Qt6 splits some classes out of the base modules, so map our module sets here.
+ifeq ($(QT),6)
+QT_MODULES_CORE    := Qt6Core
+QT_MODULES_GUI     := Qt6Gui
+QT_MODULES_WIDGETS := Qt6Widgets Qt6OpenGLWidgets Qt6OpenGL
+QT_MODULES_SVG     := Qt6Svg Qt6SvgWidgets
+else
+QT_MODULES_CORE    := Qt5Core
+QT_MODULES_GUI     := Qt5Gui
+QT_MODULES_WIDGETS := Qt5Widgets
+QT_MODULES_SVG     := Qt5Svg
+endif
+
 SH                 ?= $(SHELL)
 ECHO               ?= echo
 ECHO_NOLF          ?= echo -n
@@ -70,20 +85,20 @@ CPPFLAGS_PNG       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) li
 LIBS_PNG           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_PNG       := $(CPPFLAGS_PNG)
 LIBS_PNG           := $(LIBS_PNG)
-CPPFLAGS_QTCORE    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
-LIBS_QTCORE        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Core --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTCORE    ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QT_MODULES_CORE) --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+LIBS_QTCORE        ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QT_MODULES_CORE) --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_QTCORE    := $(CPPFLAGS_QTCORE)
 LIBS_QTCORE        := $(LIBS_QTCORE)
-CPPFLAGS_QTGUI     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
-LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Gui --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTGUI     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QT_MODULES_GUI) --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+LIBS_QTGUI         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QT_MODULES_GUI) --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_QTGUI     := $(CPPFLAGS_QTGUI)
 LIBS_QTGUI         := $(LIBS_QTGUI)
-CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
-LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTWIDGETS ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QT_MODULES_WIDGETS) --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+LIBS_QTWIDGETS     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QT_MODULES_WIDGETS) --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_QTWIDGETS := $(CPPFLAGS_QTWIDGETS)
 LIBS_QTWIDGETS     := $(LIBS_QTWIDGETS)
-CPPFLAGS_QTSVG     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Svg --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
-LIBS_QTSVG         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Svg --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_QTSVG     ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QT_MODULES_SVG) --cflags $(STDERR_TO_DEVNULL)) -DQT_NO_KEYWORDS
+LIBS_QTSVG         ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(QT_MODULES_SVG) --libs-only-L --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_QTSVG     := $(CPPFLAGS_QTSVG)
 LIBS_QTSVG         := $(LIBS_QTSVG)
 ASSIMP_INTERNAL    ?= no
@@ -119,7 +134,7 @@ DEPENDENCIES_CHECK ?= quiet
 endif
 
 # these are used on Win32 only
-GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) Qt5Widgets --variable=prefix $(STDERR_TO_DEVNULL))
+GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) $(firstword $(QT_MODULES_WIDGETS)) --variable=prefix $(STDERR_TO_DEVNULL))
 WHICHDLL           ?= which
 DLLINSTALL         ?= install-dlls.sh
 
@@ -399,10 +414,10 @@ dependencies-check:
 	checkheader libxml2-dev libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
 	checkheader libpng12-dev png.h png_create_read_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
 	checkheader "mesa-common-dev (or another OpenGL library)" GL/gl.h glClear "$(CPPFLAGS_GL)" "$(LIBS_GL)"; \
-	checkheader Qt5Core QCoreApplication QCoreApplication::exec "$(CPPFLAGS_QTCORE)" "$(LIBS_QTCORE)"; \
-	checkheader Qt5Gui QGuiApplication QGuiApplication::exec "$(CPPFLAGS_QTGUI)" "$(LIBS_QTGUI)"; \
-	checkheader Qt5Widgets QApplication QApplication::exec "$(CPPFLAGS_QTWIDGETS)" "$(LIBS_QTWIDGETS)"; \
-	checkheader Qt5Svg QSvgWidget QSvgWidget::mouseGrabber "$(CPPFLAGS_QTSVG)" "$(LIBS_QTSVG)"; \
+	checkheader Qt$(QT)Core QCoreApplication QCoreApplication::exec "$(CPPFLAGS_QTCORE)" "$(LIBS_QTCORE)"; \
+	checkheader Qt$(QT)Gui QGuiApplication QGuiApplication::exec "$(CPPFLAGS_QTGUI)" "$(LIBS_QTGUI)"; \
+	checkheader Qt$(QT)Widgets QApplication QApplication::exec "$(CPPFLAGS_QTWIDGETS)" "$(LIBS_QTWIDGETS)"; \
+	checkheader Qt$(QT)Svg QSvgWidget QSvgWidget::mouseGrabber "$(CPPFLAGS_QTSVG)" "$(LIBS_QTSVG)"; \
 	[ "$(ASSIMP_INTERNAL)" != "yes" ] && checkheader libassimp-dev assimp/Importer.hpp Assimp::Importer::MaxLenHint "$(CPPFLAGS_ASSIMP)" "$(LIBS_ASSIMP)"; \
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
@@ -1031,6 +1046,8 @@ $(INSTALLDIR)/modules/archivepak.$(DLL): \
 	plugins/archivepak/pak.o \
 	plugins/archivepak/plugin.o \
 
+# These use Qt headers, so Qt 6.5+ wants qt_version_tag resolved at link time.
+$(INSTALLDIR)/modules/entity.$(DLL): LIBS_EXTRA := $(LIBS_QTCORE)
 $(INSTALLDIR)/modules/entity.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude $(CPPFLAGS_QTGUI)
 $(INSTALLDIR)/modules/entity.$(DLL): \
 	plugins/entity/angle.o \
@@ -1107,7 +1124,7 @@ ifeq ($(ASSIMP_INTERNAL),yes)
 $(INSTALLDIR)/modules/assmodel.$(DLL): LDFLAGS_EXTRA := -Wl,-rpath '-Wl,$$ORIGIN/..'
 endif
 endif
-$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := $(LIBS_ASSIMP)
+$(INSTALLDIR)/modules/assmodel.$(DLL): LIBS_EXTRA := $(LIBS_ASSIMP) $(LIBS_QTCORE)
 $(INSTALLDIR)/modules/assmodel.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude $(CPPFLAGS_ASSIMP) $(CPPFLAGS_QTGUI)
 $(INSTALLDIR)/modules/assmodel.$(DLL): \
 	plugins/assmodel/mdlimage.o \

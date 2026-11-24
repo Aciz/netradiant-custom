@@ -29,20 +29,53 @@
 #include "debugging/debugging.h"
 
 
+// QMouseEvent is not copyable in Qt6; keep the state we need and rebuild the event on demand.
+class MouseEventState
+{
+	QEvent::Type m_type = QEvent::MouseMove;
+	QPointF m_localPos;
+	QPointF m_globalPos;
+	Qt::MouseButton m_button = Qt::NoButton;
+	Qt::MouseButtons m_buttons;
+	Qt::KeyboardModifiers m_modifiers;
+public:
+	MouseEventState() = default;
+	explicit MouseEventState( const QMouseEvent& event ) :
+		m_type( event.type() ),
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+		m_localPos( event.position() ),
+		m_globalPos( event.globalPosition() ),
+#else
+		m_localPos( event.localPos() ),
+		m_globalPos( event.screenPos() ),
+#endif
+		m_button( event.button() ),
+		m_buttons( event.buttons() ),
+		m_modifiers( event.modifiers() ){
+	}
+	QMouseEvent event() const {
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+		return QMouseEvent( m_type, m_localPos, m_globalPos, m_button, m_buttons, m_modifiers );
+#else
+		return QMouseEvent( m_type, m_localPos, m_localPos, m_globalPos, m_button, m_buttons, m_modifiers );
+#endif
+	}
+};
+
+
 class DeferredMotion
 {
-	QMouseEvent m_mouseMoveEvent;
+	MouseEventState m_mouseMoveEvent;
 	QTimer m_timer;
 public:
 	template<class Functor>
-	DeferredMotion( Functor func ) :
-		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() )
+	DeferredMotion( Functor func )
 	{
 		m_timer.setSingleShot( true );
-		m_timer.callOnTimeout( [this, func](){ func( m_mouseMoveEvent ); } );
+		m_timer.callOnTimeout( [this, func](){ func( m_mouseMoveEvent.event() ); } );
 	}
 	void motion( const QMouseEvent *event ){
-		m_mouseMoveEvent = *event;
+		m_mouseMoveEvent = MouseEventState( *event );
 		if( !m_timer.isActive() )
 			m_timer.start();
 	}
@@ -50,38 +83,36 @@ public:
 
 class DeferredMotion2
 {
-	QMouseEvent m_mouseMoveEvent;
+	MouseEventState m_mouseMoveEvent;
 	const std::function<void( const QMouseEvent& )> m_func;
 public:
 	template<class Functor>
 	DeferredMotion2( Functor func ) :
-		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ),
 		m_func( func )
 	{
 	}
 	void motion( const QMouseEvent& event ){
-		m_mouseMoveEvent = event;
+		m_mouseMoveEvent = MouseEventState( event );
 	}
 	void invoke(){
-		m_func( m_mouseMoveEvent );
+		m_func( m_mouseMoveEvent.event() );
 	}
 	typedef MemberCaller<DeferredMotion2, void(), &DeferredMotion2::invoke> InvokeCaller;
 };
 
 class DeferredMotionDelta
 {
-	QMouseEvent m_mouseMoveEvent;
+	MouseEventState m_mouseMoveEvent;
 	QTimer m_timer;
 	int m_delta_x = 0;
 	int m_delta_y = 0;
 public:
 	template<class Functor>
-	DeferredMotionDelta( Functor func ) :
-		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() )
+	DeferredMotionDelta( Functor func )
 	{
 		m_timer.setSingleShot( true );
 		m_timer.callOnTimeout( [this, func](){
-			func( m_delta_x, m_delta_y, m_mouseMoveEvent );
+			func( m_delta_x, m_delta_y, m_mouseMoveEvent.event() );
 			m_delta_x = 0;
 			m_delta_y = 0;
 		} );
@@ -93,7 +124,7 @@ public:
 	void motion_delta( int x, int y, const QMouseEvent *event ){
 		m_delta_x += x;
 		m_delta_y += y;
-		m_mouseMoveEvent = *event;
+		m_mouseMoveEvent = MouseEventState( *event );
 		if( !m_timer.isActive() )
 			m_timer.start();
 	}
@@ -101,24 +132,23 @@ public:
 
 class DeferredMotionDelta2
 {
-	QMouseEvent m_mouseMoveEvent;
+	MouseEventState m_mouseMoveEvent;
 	std::function<void( int, int, const QMouseEvent& )> m_func;
 	int m_delta_x = 0;
 	int m_delta_y = 0;
 public:
 	template<class Functor>
 	DeferredMotionDelta2( Functor func ) :
-		m_mouseMoveEvent( QEvent::MouseMove, QPointF(), Qt::MouseButton::NoButton, Qt::MouseButtons(), Qt::KeyboardModifiers() ),
 		m_func( func )
 	{
 	}
 	void motion_delta( int x, int y, const QMouseEvent *event ){
 		m_delta_x += x;
 		m_delta_y += y;
-		m_mouseMoveEvent = *event;
+		m_mouseMoveEvent = MouseEventState( *event );
 	}
 	void invoke(){
-		m_func( m_delta_x, m_delta_y, m_mouseMoveEvent );
+		m_func( m_delta_x, m_delta_y, m_mouseMoveEvent.event() );
 		m_delta_x = 0;
 		m_delta_y = 0;
 	}

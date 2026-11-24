@@ -188,9 +188,9 @@ void Camera_mouseMove( camera_t& camera, int x, int y, const QMouseEvent& event 
 struct MotionDeltaValues {
 	int x;
 	int y;
-	QMouseEvent mouseMoveEvent;
-	MotionDeltaValues( int x_, int y_, QMouseEvent mouseMoveEvent_ ) :
-		x( x_ ), y( y_ ), mouseMoveEvent( mouseMoveEvent_ ) {
+	Qt::KeyboardModifiers modifiers;
+	MotionDeltaValues( int x_, int y_, Qt::KeyboardModifiers modifiers_ ) :
+		x( x_ ), y( y_ ), modifiers( modifiers_ ) {
 	}
 };
 
@@ -429,7 +429,7 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 void Camera_mouseMove( camera_t& camera, int x, int y, const QMouseEvent& event ){
 	//globalOutputStream() << "mousemove... ";
 	Camera_FreeMove( camera, -x, -y );
-	camera.m_update_motion_freemove( MotionDeltaValues( x, y, event ) );
+	camera.m_update_motion_freemove( MotionDeltaValues( x, y, event.modifiers() ) );
 	CameraMovedNotify();
 }
 
@@ -1214,7 +1214,7 @@ static void selection_button_release_freemove( QWidget* widget, const QMouseEven
 void CamWnd::selection_motion_freemove( const MotionDeltaValues& delta ){
 	m_rightClickMove += sqrt( delta.x * delta.x + delta.y * delta.y );
 	m_window_observer->incMouseMove( WindowVector( delta.x, delta.y ) );
-	m_window_observer->onMouseMotion( windowvector_for_widget_centre( m_gl_widget ), modifiers_for_state( delta.mouseMoveEvent.modifiers() ) );
+	m_window_observer->onMouseMotion( windowvector_for_widget_centre( m_gl_widget ), modifiers_for_state( delta.modifiers ) );
 }
 typedef MemberCaller<CamWnd, void(const MotionDeltaValues&), &CamWnd::selection_motion_freemove> CamWnd_selection_motion_freemove;
 
@@ -1620,9 +1620,7 @@ protected:
 			m_camwnd.m_XORRectangle.render( m_camwnd.m_XORRect, m_camwnd.getCamera().width, m_camwnd.getCamera().height );
 			GlobalOpenGL_debugAssertNoErrors();
 		}
-	}
-
-	void mousePressEvent( QMouseEvent *event ) override {
+( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
 			setFocus();
 			selection_button_press( scaledEvent( event ), m_camwnd.m_window_observer );
@@ -2506,8 +2504,8 @@ void CamWnd_Construct(){
 	GlobalCommands_insert( "CameraModeNext", makeCallbackF( CameraModeNext ), QKeySequence( "Shift+]" ) );
 	GlobalCommands_insert( "CameraModePrev", makeCallbackF( CameraModePrev ), QKeySequence( "Shift+[" ) );
 
-	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), QKeySequence( +Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), QKeySequence( +Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), QKeySequence( Qt::SHIFT | Qt::Key_Plus | Qt::KeypadModifier ) );
+	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), QKeySequence( Qt::SHIFT | Qt::Key_Minus | Qt::KeypadModifier ) );
 
 	GlobalShortcuts_insert( "CameraForward", QKeySequence( "Up" ) );
 	GlobalShortcuts_insert( "CameraBack", QKeySequence( "Down" ) );

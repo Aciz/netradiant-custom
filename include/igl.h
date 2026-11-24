@@ -25,7 +25,12 @@
 #include <cstring>
 #include "generic/constant.h"
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+#include <QtOpenGL/QOpenGLFunctions_2_0>
+#else
 #include <QOpenGLFunctions_2_0>
+#endif
 #include "gtkutil/glfont.h"
 
 /// \brief A module which wraps a runtime-binding of the standard OpenGL functions.
