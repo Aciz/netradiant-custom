@@ -27,8 +27,7 @@ environment:
 - svn >= 1.1 (some build steps use svn)
 
 dependencies:
-- qt5
-- qt5-svg
+- qt5 and qt5-svg (the default), or qt6-base and qt6-svg
 - glib
 - libxml2 >= 2.0.0
 - zlib >= 1.2.0 (for archivezip module)
@@ -37,6 +36,7 @@ dependencies:
 
 build:
 run 'make'
+to build against Qt 6 instead of Qt 5, run 'make QT=6'
 
 run:
 Execute 'install/radiant.x86'
@@ -77,9 +77,11 @@ environment:
 - from MSYS2 MINGW32 or MSYS2 MINGW64 shell:
   pacman -S --needed base-devel
     32 bit:
-  pacman -S --needed mingw-w64-i686-{toolchain,qt5-base,qt5-svg,assimp,libxml2}
+  pacman -S --needed mingw-w64-i686-{toolchain,pkgconf,qt5-base,qt5-svg,assimp,libxml2}
     64 bit:
-  pacman -S --needed mingw-w64-x86_64-{toolchain,qt5-base,qt5-svg,assimp,libxml2}
+  pacman -S --needed mingw-w64-x86_64-{toolchain,pkgconf,qt5-base,qt5-svg,assimp,libxml2}
+    for Qt 6 instead of Qt 5 (then add QT=6 to the make invocations below):
+  pacman -S --needed mingw-w64-x86_64-{toolchain,pkgconf,qt6-base,qt6-svg,assimp,libxml2}
     these are only strictly required for gamepacks:
   pacman -S --needed unzip svn git
 
@@ -88,6 +90,8 @@ build:
 - Switch to the directory with NetRadiant-custom source
 - Typical release build:
   make MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc)
+- Against Qt 6:
+  make MAKEFILE_CONF=msys2-Makefile.conf BUILD=release QT=6 -j$(nproc)
 - Typical developer's build:
   make MAKEFILE_CONF=msys2-Makefile.conf DEPENDENCIES_CHECK=off DOWNLOAD_GAMEPACKS=no INSTALL_DLLS=no BUILD=debug RADIANT_ABOUTMSG="NetRadiant custom dev build" -j$(nproc)
 run:
