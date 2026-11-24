@@ -26,6 +26,7 @@
 //
 
 #include "preferences.h"
+#include "gtkutil/qtcompat.h"
 #include "environment.h"
 
 #include "debugging/debugging.h"
@@ -532,7 +533,7 @@ void Widget_connectToggleDependency( QWidget* self, QCheckBox* toggleButton ){
 		}
 	};
 	new EnabledTracker( toggleButton, self ); // track graying out for chained dependencies
-	QObject::connect( toggleButton, &QCheckBox::stateChanged, [self, toggleButton]( int state ){ // track being checked
+	qt_checkbox_state_changed( toggleButton, [self, toggleButton]( int state ){ // track being checked
 		self->setEnabled( state && toggleButton->isEnabled() );
 	} );
 	self->setEnabled( toggleButton->checkState() && toggleButton->isEnabled() ); // apply dependency effect right away

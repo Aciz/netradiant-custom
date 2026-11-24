@@ -20,6 +20,7 @@
  */
 
 #include "build.h"
+#include "gtkutil/qtcompat.h"
 #include "debugging/debugging.h"
 
 #include <map>
@@ -795,7 +796,7 @@ protected:
 		      ( index.row() + 1 == topLevelItemCount() && pos.y() > visualRect( index ).center().y() ); // last item
 	}
 	void dragMoveEvent( QDragMoveEvent* event ) override {
-		if( positionBelowLast( event->pos() ) ){
+		if( positionBelowLast( qt_drop_pos( *event ) ) ){
 			event->ignore();
 			return;
 		}
@@ -803,7 +804,7 @@ protected:
 	}
 	bool m_drop = false;
 	void dropEvent( QDropEvent* event ) override {
-		if( positionBelowLast( event->pos() ) ){
+		if( positionBelowLast( qt_drop_pos( *event ) ) ){
 			event->ignore();
 			return;
 		}

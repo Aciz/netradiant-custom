@@ -25,6 +25,7 @@
 #include <QSpinBox>
 #include <QTimer>
 #include <QLabel>
+#include "qtcompat.h"
 #include <QMouseEvent>
 
 template<class SpinT>
@@ -112,7 +113,7 @@ protected:
 			m_spin->setFocus();
 			m_spin->selectAll();
 			m_isInDrag = true;
-			m_dragStart = event->globalPos();
+			m_dragStart = qt_mouse_global_pos( *event );
 			m_dragOccured = false;
 			m_dragAccum = 0;
 			setCursor( Qt::CursorShape::BlankCursor );
@@ -120,7 +121,7 @@ protected:
     }
     void mouseMoveEvent( QMouseEvent* event ) override {
 		if( m_isInDrag && event->buttons() == Qt::MouseButton::LeftButton ){
-			m_dragAccum += event->globalPos().x() - m_dragStart.x();
+			m_dragAccum += qt_mouse_global_pos( *event ).x() - m_dragStart.x();
 			const int delta = m_dragAccum / 20;
 			if( delta != 0 ){
 				m_dragOccured = true;

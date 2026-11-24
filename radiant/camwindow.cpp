@@ -26,6 +26,7 @@
 //
 
 #include "camwindow.h"
+#include "gtkutil/qtcompat.h"
 
 #include "debugging/debugging.h"
 
@@ -1139,7 +1140,7 @@ static void enable_freelook_button_press( const QMouseEvent& event, CamWnd& camw
 		}
 		else{
 			if( m2alt )
-				camera_orbit_init( camwnd.getCamera(), Vector2( event.x(), event.y() ) );
+				camera_orbit_init( camwnd.getCamera(), Vector2( event.pos().x(), event.pos().y() ) );
 			camwnd.EnableFreeMove();
 			camwnd.m_rightClickTimer.start();
 			camwnd.m_rightClickMove = 0;
@@ -1158,7 +1159,7 @@ static void disable_freelook_button_press( const QMouseEvent& event, CamWnd& cam
 		}
 		else{
 			if( m2alt )
-				camera_orbit_init( camwnd.getCamera(), Vector2( event.x(), event.y() ) );
+				camera_orbit_init( camwnd.getCamera(), Vector2( event.pos().x(), event.pos().y() ) );
 			camwnd.m_rightClickTimer.start();
 			camwnd.m_rightClickMove = 0;
 		}
@@ -1185,16 +1186,16 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 
 static void selection_button_press( const QMouseEvent& event, WindowObserver* observer ){
 	if( !ORBIT_EVENT( event ) )
-		observer->onMouseDown( WindowVector( event.x(), event.y() ), button_for_button( event.button() ), modifiers_for_state( event.modifiers() ) );
+		observer->onMouseDown( WindowVector( event.pos().x(), event.pos().y() ), button_for_button( event.button() ), modifiers_for_state( event.modifiers() ) );
 }
 
 static void selection_button_release( const QMouseEvent& event, WindowObserver* observer ){
-	observer->onMouseUp( WindowVector( event.x(), event.y() ), button_for_button( event.button() ), modifiers_for_state( event.modifiers() ) );
+	observer->onMouseUp( WindowVector( event.pos().x(), event.pos().y() ), button_for_button( event.button() ), modifiers_for_state( event.modifiers() ) );
 }
 
 void selection_motion( const QMouseEvent& event, WindowObserver* observer ){
 	//globalOutputStream() << "motion... ";
-	observer->onMouseMotion( WindowVector( event.x(), event.y() ), modifiers_for_state( event.modifiers() ) );
+	observer->onMouseMotion( WindowVector( event.pos().x(), event.pos().y() ), modifiers_for_state( event.modifiers() ) );
 }
 
 inline WindowVector windowvector_for_widget_centre( const QWidget* widget ){
@@ -1670,7 +1671,11 @@ protected:
 	}
 private:
 	QMouseEvent scaledEvent( const QMouseEvent *event ) const {
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+		return QMouseEvent( event->type(), event->position() * m_scale, event->scenePosition() * m_scale, event->globalPosition() * m_scale, event->button(), event->buttons(), event->modifiers() );
+#else
 		return QMouseEvent( event->type(), event->localPos() * m_scale, event->windowPos() * m_scale, event->screenPos() * m_scale, event->button(), event->buttons(), event->modifiers() );
+#endif
 	}
 	QWheelEvent scaledEvent( const QWheelEvent *event ) const {
 		return QWheelEvent( event->position() * m_scale, event->globalPosition() * m_scale, event->pixelDelta(), event->angleDelta(), event->buttons(), event->modifiers(), event->phase(), false );
@@ -2515,8 +2520,8 @@ void CamWnd_Construct(){
 	GlobalCommands_insert( "CameraModeNext", makeCallbackF( CameraModeNext ), QKeySequence( "Shift+]" ) );
 	GlobalCommands_insert( "CameraModePrev", makeCallbackF( CameraModePrev ), QKeySequence( "Shift+[" ) );
 
-	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), QKeySequence( Qt::SHIFT | Qt::Key_Plus | Qt::KeypadModifier ) );
-	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), QKeySequence( Qt::SHIFT | Qt::Key_Minus | Qt::KeypadModifier ) );
+	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), qt_key_sequence( Qt::ShiftModifier | Qt::KeypadModifier, Qt::Key_Plus ) );
+	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), qt_key_sequence( Qt::ShiftModifier | Qt::KeypadModifier, Qt::Key_Minus ) );
 
 	GlobalShortcuts_insert( "CameraForward", QKeySequence( "Up" ) );
 	GlobalShortcuts_insert( "CameraBack", QKeySequence( "Down" ) );

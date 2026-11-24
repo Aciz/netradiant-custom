@@ -35,6 +35,7 @@
 //
 
 #include "gtkdlgs.h"
+#include "gtkutil/qtcompat.h"
 
 #include "debugging/debugging.h"
 #include "version.h"
@@ -1491,8 +1492,7 @@ void ShaderHighlighter::highlightBlock( const QString &text )
 
 	const auto highlight_normal = [&]( const std::vector<Rule>& rules, const QStringView str ){
 		for( const auto& rule : rules ){
-			const auto match = rule.pattern.match( str, start, QRegularExpression::MatchType::NormalMatch,
-				QRegularExpression::MatchOption::AnchoredMatchOption );
+			const auto match = qt_regex_match_anchored( rule.pattern, str, start );
 			if( match.hasMatch() ){
 				for( int i = 1; i <= match.lastCapturedIndex(); ++i ){
 					if( !rule.colors[i - 1].isValid() ){ // c_colorColor3f

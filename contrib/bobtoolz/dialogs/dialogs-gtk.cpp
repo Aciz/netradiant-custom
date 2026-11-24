@@ -18,6 +18,7 @@
  */
 
 #include "dialogs-gtk.h"
+#include "gtkutil/qtcompat.h"
 #include "../funchandlers.h"
 
 #include "../lists.h"
@@ -137,13 +138,13 @@ bool DoPolygonBox( PolygonRS* rs ){
 				vbox->addWidget( check_border = new QCheckBox( "Use Border" ) );
 				vbox->addWidget( check_inverse = new QCheckBox( "Inverse Polygon" ) );
 				vbox->addWidget( check_align = new QCheckBox( "Align Top Edge" ) );
-				QObject::connect( check_border, &QCheckBox::stateChanged, spin_border, &QWidget::setEnabled );
+				qt_checkbox_state_changed( check_border, [spin_border]( int on ){ spin_border->setEnabled( on != 0 ); } );
 				spin_border->setEnabled( false );
-				QObject::connect( check_inverse, &QCheckBox::stateChanged, [check_border]( int on ){
+				qt_checkbox_state_changed( check_inverse, [check_border]( int on ){
 					if( on ) // either of border or inverse may be used
 						check_border->setChecked( false );
 				} );
-				QObject::connect( check_border, &QCheckBox::stateChanged, [check_inverse]( int on ){
+				qt_checkbox_state_changed( check_border, [check_inverse]( int on ){
 					if( on ) // either of border or inverse may be used
 						check_inverse->setChecked( false );
 				} );
@@ -502,7 +503,7 @@ bool DoApertureDoorsBox( ApertureDoorRS* rs ){
 			spin_distance = new DoubleSpinBox( -999999, 999999, rs->distance );
 			checkDistance = new QCheckBox( "Set distance" );
 			form->addRow( checkDistance, spin_distance );
-			QObject::connect( checkDistance, &QCheckBox::stateChanged, spin_distance, &QWidget::setEnabled );
+			qt_checkbox_state_changed( checkDistance, [spin_distance]( int on ){ spin_distance->setEnabled( on != 0 ); } );
 			checkDistance->setChecked( rs->distanceSet );
 			spin_distance->setEnabled( rs->distanceSet );
 		}

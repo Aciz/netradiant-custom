@@ -407,9 +407,12 @@ int main( int argc, char* argv[] ){
 
 	glwidget_setDefaultFormat(); // must go before QApplication instantiation
 
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+	// Qt6 always enables high-DPI scaling and pixmaps; these attributes are deprecated no-ops there.
 	QCoreApplication::setAttribute( Qt::AA_EnableHighDpiScaling );
 	// QGuiApplication::setHighDpiScaleFactorRoundingPolicy( Qt::HighDpiScaleFactorRoundingPolicy::PassThrough );
 	QCoreApplication::setAttribute( Qt::AA_UseHighDpiPixmaps );
+#endif
 
 	QApplication qapplication( argc, argv );
 	setlocale( LC_NUMERIC, "C" );

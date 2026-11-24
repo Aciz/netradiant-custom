@@ -20,6 +20,7 @@
  */
 
 #include "modelwindow.h"
+#include "gtkutil/qtcompat.h"
 
 #include <set>
 #include <deque>
@@ -1010,7 +1011,7 @@ protected:
 		else if ( press == MousePresses::Left || press == MousePresses::Right ) {
 			m_modBro.tracking_MouseDown();
 			if ( press == MousePresses::Left ) {
-				m_modBro.testSelect( event->x() * m_scale, event->y() * m_scale );
+				m_modBro.testSelect( event->pos().x() * m_scale, event->pos().y() * m_scale );
 			}
 		}
 	}

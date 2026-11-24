@@ -26,6 +26,7 @@
 //
 
 #include "xywindow.h"
+#include "gtkutil/qtcompat.h"
 
 #include "debugging/debugging.h"
 
@@ -442,10 +443,10 @@ class XYGLWidget : public QOpenGLWidget
 public:
 	XYGLWidget( XYWnd& xywnd ) : QOpenGLWidget(), m_xywnd( xywnd ),
 		m_deferred_motion( [this]( const QMouseEvent& event ){
-				if ( m_xywnd.chaseMouseMotion( event.x() * m_scale, event.y() * m_scale ) ) {
+				if ( m_xywnd.chaseMouseMotion( event.pos().x() * m_scale, event.pos().y() * m_scale ) ) {
 					return;
 				}
-				m_xywnd.XY_MouseMoved( event.x() * m_scale, event.y() * m_scale, buttons_for_state( event ) );
+				m_xywnd.XY_MouseMoved( event.pos().x() * m_scale, event.pos().y() * m_scale, buttons_for_state( event ) );
 			} )
 	{
 		setMouseTracking( true );
@@ -511,17 +512,17 @@ protected:
 
 		m_xywnd.ButtonState_onMouseDown( buttons_for_event_button( event ) );
 
-		m_xywnd.onMouseDown( WindowVector( event->x(), event->y() ) * m_scale, button_for_button( event->button() ), modifiers_for_state( event->modifiers() ) );
+		m_xywnd.onMouseDown( WindowVector( event->pos().x(), event->pos().y() ) * m_scale, button_for_button( event->button() ), modifiers_for_state( event->modifiers() ) );
 	}
 	void mouseMoveEvent( QMouseEvent *event ) override {
 		m_deferred_motion.motion( event );
 	}
 	void mouseReleaseEvent( QMouseEvent *event ) override {
-		m_xywnd.XY_MouseUp( event->x() * m_scale, event->y() * m_scale, buttons_for_event_button( event ) );
+		m_xywnd.XY_MouseUp( event->pos().x() * m_scale, event->pos().y() * m_scale, buttons_for_event_button( event ) );
 
 		m_xywnd.ButtonState_onMouseUp( buttons_for_event_button( event ) );
 
-		m_xywnd.chaseMouseMotion( event->x() * m_scale, event->y() * m_scale ); /* stop chaseMouseMotion this way */
+		m_xywnd.chaseMouseMotion( event->pos().x() * m_scale, event->pos().y() * m_scale ); /* stop chaseMouseMotion this way */
 	}
 	void wheelEvent( QWheelEvent *event ) override {
 		setFocus();

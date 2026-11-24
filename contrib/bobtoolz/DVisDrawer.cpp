@@ -22,6 +22,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "DVisDrawer.h"
+#include "gtkutil/qtcompat.h"
 
 #include "iglrender.h"
 #include "math/matrix.h"
@@ -194,7 +195,7 @@ void DVisDrawer::ui_create(){
 		{
 			auto *check = new QCheckBox( "Color per leaf" );
 			vbox->addWidget( check );
-			QObject::connect( check, &QCheckBox::stateChanged, [check, this]( int on ){
+			qt_checkbox_state_changed( check, [check, this]( int on ){
 				if( on )
 					check->setText( "Color per surface" );
 				else

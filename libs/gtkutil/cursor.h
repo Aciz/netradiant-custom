@@ -25,6 +25,7 @@
 #include <QTimer>
 #include <QCursor>
 #include <QWidget>
+#include "qtcompat.h"
 
 #include "debugging/debugging.h"
 
@@ -178,11 +179,11 @@ protected:
 			const QPoint center = getCenter();
 			/* QCursor::setPos( center ) effect may happen not immediately; suspend processing till then, otherwise start dash will happen */
 			if( !m_trackingEstablished ){
-				m_trackingEstablished = mouseEvent->globalPos() == center;
+				m_trackingEstablished = qt_mouse_global_pos( *mouseEvent ) == center;
 				QCursor::setPos( center );
 			}
-			else if( mouseEvent->globalPos() != center ){
-				const QPoint delta = mouseEvent->globalPos() - center;
+			else if( qt_mouse_global_pos( *mouseEvent ) != center ){
+				const QPoint delta = qt_mouse_global_pos( *mouseEvent ) - center;
 				m_motion_delta_function( delta.x(), delta.y(), mouseEvent );
 				QCursor::setPos( center );
 			}

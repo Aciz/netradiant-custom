@@ -20,6 +20,7 @@
  */
 
 #include "commands.h"
+#include "gtkutil/qtcompat.h"
 
 #include "debugging/debugging.h"
 
@@ -299,7 +300,7 @@ protected:
 	void keyPressEvent( QKeyEvent *e ) override {
 		QKeySequenceEdit::keyPressEvent( e );
 		if( e->modifiers() & Qt::KeypadModifier ) //. workaround Qt issue: Qt::KeypadModifier is ignored
-			setKeySequence( QKeySequence( keySequence()[0] | Qt::KeypadModifier ) );
+			setKeySequence( qt_key_sequence_with_keypad( keySequence() ) );
 		if( QKeySequence_valid( keySequence() ) )
 			clearFocus(); // trigger editingFinished(); via losing focus 🙉
 			              // because this can still receive focus loss b4 getting deleted (practically because modal msgbox)
