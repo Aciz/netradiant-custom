@@ -992,7 +992,16 @@ protected:
 			m_fbo->blit();
 			m_fbo->release();
 		}
-( QMouseEvent *event ) override {
+		else {
+			/* see the comment in CamGLWidget::paintGL() */
+			gl().glClearColor( g_ModelBrowser.m_background_color[0],
+			                   g_ModelBrowser.m_background_color[1],
+			                   g_ModelBrowser.m_background_color[2], 0 );
+			gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		}
+	}
+
+	void mousePressEvent( QMouseEvent *event ) override {
 		setFocus();
 		const auto press = m_mouse.press( event );
 		if( press == MousePresses::Left2x ){

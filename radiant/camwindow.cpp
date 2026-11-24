@@ -1620,7 +1620,18 @@ protected:
 			m_camwnd.m_XORRectangle.render( m_camwnd.m_XORRect, m_camwnd.getCamera().width, m_camwnd.getCamera().height );
 			GlobalOpenGL_debugAssertNoErrors();
 		}
-( QMouseEvent *event ) override {
+		else {
+			/* Nothing is drawn while screen updates are disabled; Qt6 discards the widget's
+			   color buffer instead of clearing it, which leaves the last frame on screen.
+			   Blank the view, as Qt5 effectively did. */
+			gl().glClearColor( g_camwindow_globals.color_cameraback[0],
+			                   g_camwindow_globals.color_cameraback[1],
+			                   g_camwindow_globals.color_cameraback[2], 0 );
+			gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		}
+	}
+
+	void mousePressEvent( QMouseEvent *event ) override {
 		if( !m_camwnd.m_bFreeMove ){
 			setFocus();
 			selection_button_press( scaledEvent( event ), m_camwnd.m_window_observer );

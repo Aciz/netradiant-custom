@@ -493,7 +493,16 @@ protected:
 			m_xywnd.overlayDraw();
 			GlobalOpenGL_debugAssertNoErrors();
 		}
-( QMouseEvent *event ) override {
+		else {
+			/* see the comment in CamGLWidget::paintGL() */
+			gl().glClearColor( g_xywindow_globals.color_gridback[0],
+			                   g_xywindow_globals.color_gridback[1],
+			                   g_xywindow_globals.color_gridback[2], 0 );
+			gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		}
+	}
+
+	void mousePressEvent( QMouseEvent *event ) override {
 		setFocus();
 
 		if( !m_xywnd.Active() ){
