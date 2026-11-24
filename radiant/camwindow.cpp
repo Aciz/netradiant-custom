@@ -1097,7 +1097,7 @@ const Vector3& Camera_getViewVector( CamWnd& camwnd ){
 
 void context_menu_show(){
 	if( g_pParentWnd->ActiveXY() ){
-		g_pParentWnd->ActiveXY()->OnContextMenu();
+		g_pParentWnd->ActiveXY()->OnContextMenu( QCursor::pos() );
 		g_bCamEntityMenu = true;
 	}
 }

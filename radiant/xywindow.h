@@ -202,7 +202,7 @@ private:
 	Timer m_render_time;
 
 public:
-	void OnContextMenu();
+	void OnContextMenu( const QPoint& globalPos );
 	void ButtonState_onMouseDown( unsigned int buttons ){
 		//m_buttonstate |= buttons;
 		m_buttonstate = buttons;

@@ -871,7 +871,7 @@ public:
 	}
 };
 
-void XYWnd::OnContextMenu(){
+void XYWnd::OnContextMenu( const QPoint& globalPos ){
 	if ( m_mnuDrop == 0 ) { // first time, load it up
 		m_mnuDrop = new EntityMenu( "" );
 //		m_mnuDrop->setTearOffEnabled( true ); // problematic mouse events override in torn off menu
@@ -883,7 +883,7 @@ void XYWnd::OnContextMenu(){
 
 	g_entityCreationOffset = 0;
 	g_bCamEntityMenu = false;
-	m_mnuDrop->popup( QCursor::pos() );
+	m_mnuDrop->popup( globalPos );
 }
 
 static FreezePointer g_xywnd_freezePointer;
@@ -1085,7 +1085,7 @@ void XYWnd::EntityCreate_MouseMove( int x, int y ){
 void XYWnd::EntityCreate_MouseUp( int x, int y ){
 	if ( m_entityCreate ) {
 		m_entityCreate = false;
-		OnContextMenu();
+		OnContextMenu( g_xywnd_freezePointer.initial_pos() );
 	}
 }
 

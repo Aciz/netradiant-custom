@@ -172,6 +172,11 @@ class FreezePointer : public QObject
 	QPoint getCenter() const {
 		return m_widget->mapToGlobal( m_widget->rect().center() );
 	}
+public:
+	/// Cursor position captured when the pointer was frozen; valid until the next freeze.
+	QPoint initial_pos() const {
+		return m_initial_pos;
+	}
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::MouseMove ) {

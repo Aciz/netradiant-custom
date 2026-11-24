@@ -1580,8 +1580,9 @@ void TextureBrowser_pasteTag(){
 
 
 void TextureBrowser_ContextMenu( TextureBrowser& texBro, qreal deviceScale ){
-	// find click pos this way, because mouse release event occurs in the widget center due to freezepointer
-	const QPoint cursorPos = QCursor::pos();
+	// the mouse release event occurs in the widget center due to freezepointer; on Wayland
+	// the restoring warp has not been processed yet, so use the position captured on press
+	const QPoint cursorPos = texBro.m_freezePointer.initial_pos();
 	const QPoint clickPos = texBro.m_gl_widget->mapFromGlobal( cursorPos ) * deviceScale;
 	// get either clicked or active shader
 	IShader* shader = Texture_At( texBro, clickPos.x(), clickPos.y() );
