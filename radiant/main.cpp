@@ -88,6 +88,7 @@
 #include "error.h"
 
 #include <QApplication>
+#include <QLoggingCategory>
 #include "gtkutil/glwidget.h"
 
 void show_splash();
@@ -105,6 +106,12 @@ void crt_init(){
 
 void qute_messageHandler( QtMsgType type, const QMessageLogContext &context, const QString &msg )
 {
+	// QtWayland emits this whenever QMenuBar or QToolBar grabs the mouse.
+	// The grab is only used to track a release and works without the platform grab, so filter out this as it's noisy.
+	if ( type == QtWarningMsg && msg == QLatin1String( "This plugin supports grabbing the mouse only for popup windows" ) ) {
+		return;
+	}
+
 	static StringOutputStream buf( 256 );
 	buf.clear();
 	switch ( type )
@@ -390,10 +397,11 @@ void remove_local_pid(){
 
 
 int main( int argc, char* argv[] ){
-#ifdef __linux__
-	// Mouse pointer warping functions do not work with the Wayland backend.
-	// Forcing the backend to X11 will let us run using XWayland
-	// which does provide emulation of this functionality.
+#if defined( __linux__ ) && QT_VERSION < QT_VERSION_CHECK( 6, 10, 0 )
+	// Qt 6.10.0 added support for wp_pointer_warp_v1 protocol, which allows freelook to function under Wayland.
+	// For older versions, force X11/XWayland instead to make freelook function.
+	// Compositors without pointer warp support can still opt-in to the XWayland path,
+	// but the protocol is pretty well supported on most popular environments.
 	setenv( "QT_QPA_PLATFORM", "xcb", 0 );
 #endif
 
@@ -415,6 +423,11 @@ int main( int argc, char* argv[] ){
 #endif
 
 	QApplication qapplication( argc, argv );
+
+	if ( QGuiApplication::platformName().startsWith( QLatin1String( "wayland" ) ) ) {
+		QLoggingCategory::setFilterRules( "qt.qpa.wayland.textinput.warning=false" ); // Qt noise on focus changes
+	}
+
 	setlocale( LC_NUMERIC, "C" );
 	qInstallMessageHandler( qute_messageHandler );
 	QCoreApplication::setOrganizationName( "QtRadiant" );

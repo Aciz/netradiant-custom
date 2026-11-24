@@ -769,7 +769,7 @@ void ModelBrowser_render(){
 
 	gl().glClearColor( g_ModelBrowser.m_background_color[0],
 	                   g_ModelBrowser.m_background_color[1],
-	                   g_ModelBrowser.m_background_color[2], 0 );
+	                   g_ModelBrowser.m_background_color[2], 1 );
 	gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	const unsigned int globalstate = RENDER_DEPTHTEST
@@ -997,7 +997,7 @@ protected:
 			/* see the comment in CamGLWidget::paintGL() */
 			gl().glClearColor( g_ModelBrowser.m_background_color[0],
 			                   g_ModelBrowser.m_background_color[1],
-			                   g_ModelBrowser.m_background_color[2], 0 );
+			                   g_ModelBrowser.m_background_color[2], 1 );
 			gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		}
 	}

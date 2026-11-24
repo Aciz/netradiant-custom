@@ -77,6 +77,9 @@ void glwidget_setDefaultFormat(){
 	QCoreApplication::setAttribute( Qt::ApplicationAttribute::AA_ShareOpenGLContexts );
 	QSurfaceFormat format;
 	format.setVersion( 2, 0 );
+	// Wayland defaults to an OpenGL ES context, which lacks the fixed-function pipeline
+	// this renderer uses - ask for desktop OpenGL explicitly.
+	format.setRenderableType( QSurfaceFormat::OpenGL );
 	format.setSwapInterval( 0 );
 //	format.setSamples( 8 );
 	QSurfaceFormat::setDefaultFormat( format );

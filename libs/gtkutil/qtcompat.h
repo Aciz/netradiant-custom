@@ -31,6 +31,12 @@
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QDropEvent>
+#include <QGuiApplication>
+
+/// True when the running platform plugin is Wayland.
+inline bool qt_is_wayland() {
+	return QGuiApplication::platformName().startsWith( QLatin1String( "wayland" ) );
+}
 
 /// Global (screen) position of a mouse event.
 inline QPoint qt_mouse_global_pos( const QMouseEvent& event ) {

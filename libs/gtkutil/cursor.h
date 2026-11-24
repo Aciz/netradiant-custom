@@ -218,7 +218,15 @@ public:
 		m_focus_out_function = focus_out_function;
 
 		m_widget->installEventFilter( this );
-		m_widget->grabMouse( Qt::CursorShape::BlankCursor ); // is only needed for released mouse freezing, prevents certain glitches
+
+		if ( qt_is_wayland() ) {
+			// Wayland only allows mouse grabs for popups. The pointer is recentred anyway,
+			// so the grab can be skipped, but the blank cursor has to be set explicitly.
+			m_widget->setCursor( Qt::CursorShape::BlankCursor );
+		} else {
+			m_widget->grabMouse( Qt::CursorShape::BlankCursor );
+		}
+
 		/* using center for tracking for max safety */
 		QCursor::setPos( getCenter() );
 	}
@@ -227,7 +235,13 @@ public:
 		ASSERT_MESSAGE( m_widget != nullptr, "can't unfreeze pointer: is not frozen" );
 
 		m_rescueTimer.stop();
-		m_widget->releaseMouse();
+
+		if ( qt_is_wayland() ) {
+			m_widget->unsetCursor();
+		} else {
+			m_widget->releaseMouse();
+		}
+
 		m_widget->removeEventFilter( this );
 
 		if( centerize )

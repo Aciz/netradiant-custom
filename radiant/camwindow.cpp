@@ -1627,7 +1627,7 @@ protected:
 			   Blank the view, as Qt5 effectively did. */
 			gl().glClearColor( g_camwindow_globals.color_cameraback[0],
 			                   g_camwindow_globals.color_cameraback[1],
-			                   g_camwindow_globals.color_cameraback[2], 0 );
+			                   g_camwindow_globals.color_cameraback[2], 1 );
 			gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		}
 	}
@@ -1958,7 +1958,7 @@ void CamWnd::Cam_Draw(){
 		clearColour = g_camwindow_globals.color_cameraback;
 	}
 
-	gl().glClearColor( clearColour[0], clearColour[1], clearColour[2], 0 );
+	gl().glClearColor( clearColour[0], clearColour[1], clearColour[2], 1 );
 	gl().glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	extern void Renderer_ResetStats();
