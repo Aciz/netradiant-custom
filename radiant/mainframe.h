@@ -199,6 +199,8 @@ void Radiant_Initialise();
 void Radiant_Shutdown();
 
 void Radiant_Restart();
+/// Quits the application without asking again about unsaved changes; for callers that already did.
+void Radiant_Quit();
 
 
 void XY_UpdateAllWindows();

@@ -414,7 +414,7 @@ static void OnButtonClean( PrefsDlg *dlg ){
 
 		g_preferences_globals.disable_ini = true;
 		Preferences_Reset();
-		QCoreApplication::quit();
+		Radiant_Quit();
 	}
 }
 

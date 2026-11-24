@@ -618,9 +618,24 @@ void Radiant_Shutdown(){
 	GlobalModuleServer_Shutdown();
 }
 
+namespace
+{
+/// Set once the user has confirmed exiting. Qt6's QCoreApplication::quit() closes all
+/// top-level windows, which would otherwise re-enter closeEvent() and ask a second time.
+bool g_quit_confirmed = false;
+}
+
+void Radiant_Quit(){
+	g_quit_confirmed = true;
+	QCoreApplication::quit();
+}
+
 void Exit(){
+	if ( g_quit_confirmed ) {
+		return;
+	}
 	if ( ConfirmModified( "Exit Radiant" ) ) {
-		QCoreApplication::quit();
+		Radiant_Quit();
 	}
 }
 
@@ -650,7 +665,7 @@ void Radiant_Restart(){
 
 		// quit if radiant successfully started
 		if ( status == 0 ) {
-			QCoreApplication::quit();
+			Radiant_Quit();
 		}
 	}
 }
@@ -1613,8 +1628,16 @@ class RadiantQMainWindow : public QMainWindow
 {
 protected:
 	void closeEvent( QCloseEvent *event ) override {
-		event->ignore();
-		Exit();
+		if ( g_quit_confirmed ) {
+			event->accept();
+			return;
+		}
+		if ( !ConfirmModified( "Exit Radiant" ) ) {
+			event->ignore();
+			return;
+		}
+		event->accept();
+		Radiant_Quit();
 	}
 	bool event( QEvent *event ) override {
 		if( event->type() == QEvent::ShortcutOverride && !QGuiApplication::mouseButtons().testFlag( Qt::MouseButton::NoButton ) ){
